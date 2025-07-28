@@ -11,7 +11,11 @@ terraform {
 }
 
 module "networking" {
-  source          = "../../modules/networking"
-  project_name    = var.main_project_name
-  vpc_cidr_block  = var.main_vpc_cidr_block
+    source          = "../../modules/networking"
+    project_name    = var.main_project_name
+    vpc_cidr_block  = var.main_vpc_cidr_block
+    pub_subnet_cidr = var.main_pub_subnets_cidr
+    priv_subnet_cidr = var.main_priv_subnets_cidr
+    subs_az        = var.main_subs_az
 }
+
