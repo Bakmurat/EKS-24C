@@ -1,0 +1,17 @@
+provider "aws" {
+    region = var.region
+}
+
+terraform {
+  backend "s3" {
+    bucket         = "studentgroup-terraform-state-file"
+    key            = "dev/terraform.tfstate"
+    region         = "us-west-2"
+  }
+}
+
+module "networking" {
+  source          = "../../modules/networking"
+  project_name    = var.main_project_name
+  vpc_cidr_block  = var.main_vpc_cidr_block
+}
