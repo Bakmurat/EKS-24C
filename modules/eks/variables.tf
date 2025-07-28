@@ -19,3 +19,7 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "instance_type" {
+  description = "Instance type for the EKS worker nodes"
+  type        = string
+  default     = "t2.medium"

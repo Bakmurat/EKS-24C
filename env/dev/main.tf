@@ -19,3 +19,12 @@ module "networking" {
     subs_az        = var.main_subs_az
 }
 
+module "eks" {
+    source          = "../../modules/eks"
+    project_name    = var.main_project_name
+
+    vpc_id          = module.networking.fp-vpc-id
+    subnet_ids  = module.networking.fb-pub-subnet-ids
+
+
+}
