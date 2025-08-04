@@ -176,7 +176,7 @@ resource "aws_autoscaling_group" "eks-asg" {
 
   capacity_rebalance = true
 
-  tags {
+  tag {
     key                 = "Name"
     value               = "${var.project_name}-worker-nodes"
     propagate_at_launch = true
