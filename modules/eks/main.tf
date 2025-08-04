@@ -223,7 +223,7 @@ resource "null_resource" "update_aws_auth" {
   depends_on = [aws_eks_cluster.fp-cluster]
   provisioner "local-exec" {
     command = <<-EOT
-      aws eks update-kubeconfig --name "B24c-project-main-cluster" --region us-west-2
+      aws eks update-kubeconfig --name "project-main-cluster" --region us-west-2
       kubectl apply -f - <<EOF
       apiVersion: v1
       kind: ConfigMap
