@@ -26,6 +26,11 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+resource "aws_iam_role_policy_attachment" "eks_service_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role       = aws_iam_role.eks_cluster_role.name
+}
+
 resource "aws_iam_role" "worker-nodes-role" {
   name = "${var.project_name}-worker-nodes-role"
 
@@ -60,6 +65,16 @@ resource "aws_iam_role_policy_attachment" "cni_policy" {
 resource "aws_iam_role_policy_attachment" "ecr_read_only" {
   role       = aws_iam_role.worker-nodes-role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+resource "aws_iam_role_policy_attachment" "admin-role-attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  role       = aws_iam_role.worker-nodes-role.name
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_policy_attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = aws_iam_role.worker-nodes-role.name
 }
 
 resource "aws_iam_instance_profile" "worker_nodes_profile" {
@@ -162,7 +177,10 @@ resource "aws_launch_template" "worker_nodes_lt" {
     }
   }
 
-  vpc_security_group_ids = [aws_security_group.worker-sg.id]
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.workers-sg.id]
+  }
 }
 
 resource "aws_autoscaling_group" "eks-asg" {
