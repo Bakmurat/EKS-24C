@@ -107,6 +107,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_egress_worker" {
 resource "aws_eks_cluster" "fp-cluster" {
   name     = "${var.project_name}-main-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
+  version  = var.cluster_version
 
   vpc_config {
     subnet_ids = var.subnet_ids
@@ -122,6 +123,10 @@ resource "aws_eks_cluster" "fp-cluster" {
 
   kubernetes_network_config {
     service_ipv4_cidr = var.service_ipv4_cidr
+  }
+
+  tags = {
+    Name = "${var.project_name}-main-cluster"
   }
 
   depends_on = [
@@ -145,9 +150,17 @@ resource "aws_launch_template" "worker_nodes_lt" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
+    set -o xtrace
     /etc/eks/bootstrap.sh ${aws_eks_cluster.fp-cluster.name}
     EOF
   )
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${var.project_name}-main-cluster-node"
+    }
+  }
 
   vpc_security_group_ids = [aws_security_group.worker-sg.id]
 }

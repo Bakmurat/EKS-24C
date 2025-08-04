@@ -36,4 +36,8 @@ module "eks" {
   max_size        = var.main_max_size
   desired_capacity = var.main_desired_capacity
 
+  on_demand_base_capacity = var.main_on_demand_base_capacity
+  on_demand_percentage_above_base_capacity = var.main_on_demand_percentage_above_base_capacity
+  spot_allocation_strategy = var.main_spot_allocation_strategy
+
 }

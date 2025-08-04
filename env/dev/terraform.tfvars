@@ -18,5 +18,5 @@ main_max_size = 4
 main_desired_capacity = 3
 
 main_on_demand_base_capacity = 0
-main_on_demand_percentage_above_base_capacity = 50
+main_on_demand_percentage_above_base_capacity = 20
 main_spot_allocation_strategy = "lowest-price"
