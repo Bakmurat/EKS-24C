@@ -74,15 +74,15 @@ resource "aws_security_group" "eks_cluster_sg" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_security_group_ingress" "allow_all_ingress_control" {
+resource "aws_vpc_security_group_ingress_rule" "allow_all_ingress_control" {
   security_group_id = aws_security_group.eks_cluster_sg.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  protocol        = "-1"
+  cidr_ipv4       = ["0.0.0.0/0"]
+  ip_protocol        = "-1"
 }
-resource "aws_security_group_egress" "allow_all_egress_control" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_egress_control" {
   security_group_id = aws_security_group.eks_cluster_sg.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  protocol        = "-1"
+  cidr_ipv4       = ["0.0.0.0/0"]
+  ip_protocol        = "-1"
 }
 
 resource "aws_security_group" "worker-sg" {
@@ -91,16 +91,16 @@ resource "aws_security_group" "worker-sg" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_security_group_ingress" "allow_all_ingress_worker" {
+resource "aws_vpc_security_group_ingress_rule" "allow_all_ingress_worker" {
   security_group_id = aws_security_group.worker-sg.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  protocol        = "-1"
+  cidr_ipv4       = ["0.0.0.0/0"]
+  ip_protocol        = "-1"
 }
 
-resource "aws_security_group_egress" "allow_all_egress_worker" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_egress_worker" {
   security_group_id = aws_security_group.worker-sg.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  protocol        = "-1"
+  cidr_ipv4       = ["0.0.0.0/0"]
+  ip_protocol        = "-1"
 }
 
 # ======================= EKS Cluster ========================
@@ -152,7 +152,7 @@ resource "aws_launch_template" "worker_nodes_lt" {
   vpc_security_group_ids = [aws_security_group.worker-sg.id]
 }
 
-resource "aws_auto_scaling_group" "eks-asg" {
+resource "aws_autoscaling_group" "eks-asg" {
   name = "${var.project_name}-ASG"
   min_size     = var.min_size
   max_size     = var.max_size
