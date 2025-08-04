@@ -120,6 +120,10 @@ resource "aws_eks_cluster" "fp-cluster" {
     bootstrap_cluster_creator_admin_permissions = true
   }
 
+  kubernetes_network_config {
+    service_ipv4_cidr = var.service_ipv4_cidr
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy
   ]
@@ -148,27 +152,66 @@ resource "aws_launch_template" "worker_nodes_lt" {
   vpc_security_group_ids = [aws_security_group.worker-sg.id]
 }
 
-# resource "aws_auto_scaling_group" "eks-asg" {
-#     name = "${var.project_name}-worker-nodes-asg"
-#     min_size     = var.min_size
-#     max_size     = var.max_size
-#     desired_capacity = var.desired_capacity
-#     vpc_zone_identifier = var.subnet_ids
+resource "aws_auto_scaling_group" "eks-asg" {
+  name = "${var.project_name}-ASG"
+  min_size     = var.min_size
+  max_size     = var.max_size
+  desired_capacity = var.desired_capacity
+  vpc_zone_identifier = var.subnet_ids
 
-#     launch_template {
-#     id      = aws_launch_template.worker_nodes_lt.id
-#     version = "$Latest"
-#     }
+  mixed_instances_policy {
+      instances_distribution {
+          on_demand_base_capacity       = var.on_demand_base_capacity
+          on_demand_percentage_above_base_capacity = var.on_demand_percentage_above_base_capacity
+          spot_allocation_strategy      = var.spot_allocation_strategy
+      }
 
-#     vpc_zone_identifier = var.subnet_ids
+      launch_template {
+          launch_template_specification {
+              launch_template_id = aws_launch_template.worker_nodes_lt.id
+              version            = "$Latest"
+          }
+      }
+  }
 
-#     tag {
-#     key                 = "Name"
-#     value               = "${var.project_name}-worker-node"
-#     propagate_at_launch = true
-#     }
+  capacity_rebalance = true
 
-#     depends_on = [
-#     aws_iam_instance_profile.worker_nodes_profile
-#     ]
-# }
+  tags {
+    key                 = "Name"
+    value               = "${var.project_name}-worker-nodes"
+    propagate_at_launch = true
+  }
+  tag {
+    key                 = "kubernetes.io/cluster/${var.cluster_name}"
+    value               = "owned"
+    propagate_at_launch = true
+  }
+}
+
+resource "null_resource" "update_aws_auth" {
+  depends_on = [aws_eks_cluster.fp-cluster]
+  provisioner "local-exec" {
+    command = <<-EOT
+      aws eks update-kubeconfig --name "B24c-project-main-cluster" --region us-west-2
+      kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: aws-auth
+        namespace: kube-system
+      data:
+        mapRoles: |
+          - rolearn: ${aws_iam_role.worker-nodes-role.arn}
+            username: system:node:{{EC2PrivateDNSName}}
+            groups:
+              - system:bootstrappers
+              - system:nodes
+          - rolearn: arn:aws:iam::123848992453:user/admin
+            username: admin
+            groups:
+              - system:masters
+      EOF
+    EOT
+  }
+}
+
