@@ -179,7 +179,7 @@ resource "aws_launch_template" "worker_nodes_lt" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.workers-sg.id]
+    security_groups             = [aws_security_group.worker-sg.id]
   }
 }
 
