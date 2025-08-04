@@ -1,6 +1,6 @@
 # Generic values
 region = "us-west-2"
-main_project_name = "B24c-project"
+main_project_name = "project"
 
 # EKS networking values
 main_vpc_cidr_block = "10.0.0.0/16"
@@ -11,7 +11,7 @@ main_subs_az = [ "us-west-2a", "us-west-2b", "us-west-2c" ]
 # EKS values
 main_cluster_version = "1.31"
 main_service_ipv4_cidr = "172.20.0.0/16"
-main_instance_type = "t2.medium"
+main_instance_type = "t2.small"
 
 main_min_size = 2
 main_max_size = 4
